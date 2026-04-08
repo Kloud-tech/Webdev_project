@@ -1,0 +1,120 @@
+@baseUrl = http://localhost:3000
+@email = trader@example.com
+@password = password123
+@username = traderdesk
+
+###
+# Inscription
+# @name register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "username": "{{username}}"
+}
+
+###
+# Renvoi du mail de validation
+# @name resendEmail
+POST {{baseUrl}}/auth/resend-verification-email
+Content-Type: application/json
+
+{
+  "email": "{{email}}"
+}
+
+###
+# Validation du compte
+GET {{resendEmail.response.body.verificationUrl}}
+
+###
+# Connexion
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+###
+# Profil courant
+GET {{baseUrl}}/users/me
+
+###
+# Dashboard de stats
+GET {{baseUrl}}/trades/stats/overview
+
+###
+# Création d'un trade
+# @name createTrade
+POST {{baseUrl}}/trades
+Content-Type: application/json
+
+{
+  "symbol": "NQ1!",
+  "market": "Futures",
+  "side": "long",
+  "status": "closed",
+  "strategy": "Breakout",
+  "timeframe": "5m",
+  "session": "New York Open",
+  "entryPrice": 18245.5,
+  "stopLoss": 18215,
+  "takeProfit": 18305,
+  "exitPrice": 18298,
+  "quantity": 2,
+  "riskAmount": 61,
+  "fees": 4,
+  "conviction": 4,
+  "tags": ["breakout", "ny-open"],
+  "screenshotUrl": "https://example.com/setup.png",
+  "setupNotes": "Cassure du range d'ouverture avec volume.",
+  "reviewNotes": "Sortie manuelle avant target complète.",
+  "openedAt": "2026-04-08T13:35:00.000Z",
+  "closedAt": "2026-04-08T14:02:00.000Z"
+}
+
+###
+# Liste des trades
+GET {{baseUrl}}/trades?limit=20&status=closed&search=NQ
+
+###
+# Détail du trade créé
+GET {{baseUrl}}/trades/{{createTrade.response.body.trade.id}}
+
+###
+# Mise à jour du trade créé
+PATCH {{baseUrl}}/trades/{{createTrade.response.body.trade.id}}
+Content-Type: application/json
+
+{
+  "symbol": "NQ1!",
+  "market": "Futures",
+  "side": "long",
+  "status": "closed",
+  "strategy": "Breakout",
+  "timeframe": "5m",
+  "session": "New York Open",
+  "entryPrice": 18245.5,
+  "stopLoss": 18215,
+  "takeProfit": 18305,
+  "exitPrice": 18302,
+  "quantity": 2,
+  "riskAmount": 61,
+  "fees": 4,
+  "conviction": 5,
+  "tags": ["breakout", "a-setup"],
+  "screenshotUrl": "https://example.com/setup.png",
+  "setupNotes": "Cassure propre après compression.",
+  "reviewNotes": "Execution conforme au plan.",
+  "openedAt": "2026-04-08T13:35:00.000Z",
+  "closedAt": "2026-04-08T14:05:00.000Z"
+}
+
+###
+# Suppression du trade créé
+DELETE {{baseUrl}}/trades/{{createTrade.response.body.trade.id}}
