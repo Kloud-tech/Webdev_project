@@ -1,0 +1,28 @@
+{
+  "name": "webdev-esilv-starter",
+  "type": "commonjs",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "npm@11.7.0",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "scripts": {
+    "start": "turbo run start --filter=server",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint --parallel"
+  },
+  "dependencies": {
+    "turbo": "^2.8.14"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^7.7.0",
+    "@unocss/eslint-plugin": "^66.6.6",
+    "eslint": "^10.0.3"
+  }
+}

@@ -1,0 +1,14 @@
+services:
+    mongodb:
+        image: mongo:latest
+        ports:
+            - "35115:27017"
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: password
+        volumes:
+            - mongodb_data:/data/db
+            - ./mongo-init:/docker-entrypoint-initdb.d:ro
+
+volumes:
+    mongodb_data:
