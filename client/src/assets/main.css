@@ -346,6 +346,29 @@ button {
   align-items: center;
 }
 
+.currency-switcher {
+  display: grid;
+  gap: 0.45rem;
+  justify-items: end;
+}
+
+.currency-switcher span {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.currency-switcher select {
+  min-width: 170px;
+  padding: 0.8rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  background: rgba(255, 255, 255, 0.8);
+  color: #111827;
+}
+
 .panel-card,
 .metric-card,
 .filters-card {
@@ -401,10 +424,20 @@ button {
   background: rgba(17, 24, 39, 0.03);
 }
 
+.state-pill--stacked {
+  display: grid;
+  justify-content: start;
+}
+
 .trade-highlight span,
 .profile-row span,
 .state-pill span,
 .table-main span {
+  color: var(--muted);
+}
+
+.state-pill small,
+.analysis-row span {
   color: var(--muted);
 }
 
@@ -447,6 +480,25 @@ button {
 
 .form-field textarea {
   resize: vertical;
+}
+
+.field-error {
+  color: var(--danger);
+}
+
+.screenshot-preview {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.screenshot-preview img {
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  border-radius: 18px;
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .form-field--wide {
@@ -494,6 +546,32 @@ button {
   border-radius: 18px;
   color: var(--muted);
   background: rgba(17, 24, 39, 0.03);
+}
+
+.analysis-list,
+.analysis-table {
+  display: grid;
+  gap: 1rem;
+}
+
+.analysis-item,
+.analysis-row {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  background: rgba(17, 24, 39, 0.03);
+}
+
+.analysis-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.analysis-row > div {
+  display: grid;
+  gap: 0.2rem;
 }
 
 .auth-links {

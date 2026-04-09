@@ -11,6 +11,7 @@ const navigation = [
   { label: 'Dashboard', to: '/app/dashboard' },
   { label: 'Trades', to: '/app/trades' },
   { label: 'Nouveau trade', to: '/app/trades/new' },
+  { label: 'Analyse', to: '/app/analysis' },
   { label: 'Profil', to: '/app/profile' },
 ]
 

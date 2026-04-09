@@ -4,6 +4,10 @@ function fetchTradeOverview() {
   return request('/trades/stats/overview')
 }
 
+function fetchTradeAnalysis() {
+  return request('/trades/stats/analysis')
+}
+
 function fetchTrades(query = {}) {
   return request('/trades', { query })
 }
@@ -35,6 +39,7 @@ function deleteTrade(tradeId) {
 export {
   createTrade,
   deleteTrade,
+  fetchTradeAnalysis,
   fetchTrade,
   fetchTradeOverview,
   fetchTrades,

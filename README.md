@@ -2,7 +2,7 @@
 
 Mini-projet ESILV 2026 réalisé à partir du starter du cours.
 
-Projet de Alexandre KOCH et Romain BERNARD-MASSIAS
+Projet de Alexandre KOCH 
 
 ## Lancement rapide
 

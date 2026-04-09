@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 
 import {
   marketOptions,
@@ -27,6 +27,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['submit'])
+const screenshotInput = ref(null)
+const screenshotError = ref('')
 
 const form = reactive({
   symbol: '',
@@ -81,6 +83,7 @@ watch(() => props.modelValue, (value) => {
 })
 
 const canShowReviewNotes = computed(() => ['closed', 'cancelled'].includes(form.status))
+const screenshotPreview = computed(() => form.screenshotUrl || '')
 
 function normalizeOptionalNumber(value) {
   if (value === '' || value === null || value === undefined) {
@@ -88,6 +91,50 @@ function normalizeOptionalNumber(value) {
   }
 
   return Number(value)
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = () => reject(new Error('Lecture impossible'))
+    reader.readAsDataURL(file)
+  })
+}
+
+async function handleScreenshotChange(event) {
+  screenshotError.value = ''
+  const file = event.target.files?.[0]
+
+  if (!file) {
+    return
+  }
+
+  if (!file.type.startsWith('image/')) {
+    screenshotError.value = 'Choisis une image.'
+    event.target.value = ''
+    return
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    screenshotError.value = 'Image trop lourde. Maximum 2 Mo.'
+    event.target.value = ''
+    return
+  }
+
+  try {
+    form.screenshotUrl = await readFileAsDataUrl(file)
+  } catch {
+    screenshotError.value = 'Impossible de charger l’image.'
+  }
+}
+
+function clearScreenshot() {
+  form.screenshotUrl = ''
+  screenshotError.value = ''
+  if (screenshotInput.value) {
+    screenshotInput.value.value = ''
+  }
 }
 
 function handleSubmit() {
@@ -99,20 +146,20 @@ function handleSubmit() {
     strategy: form.strategy,
     timeframe: form.timeframe,
     session: form.session,
-    entryPrice: Number(form.entryPrice),
-    stopLoss: Number(form.stopLoss),
-    takeProfit: Number(form.takeProfit),
+    entryPrice: normalizeOptionalNumber(form.entryPrice),
+    stopLoss: normalizeOptionalNumber(form.stopLoss),
+    takeProfit: normalizeOptionalNumber(form.takeProfit),
     exitPrice: normalizeOptionalNumber(form.exitPrice),
-    quantity: Number(form.quantity),
+    quantity: normalizeOptionalNumber(form.quantity),
     riskAmount: normalizeOptionalNumber(form.riskAmount),
     realizedPnl: normalizeOptionalNumber(form.realizedPnl),
-    fees: Number(form.fees || 0),
+    fees: normalizeOptionalNumber(form.fees),
     conviction: normalizeOptionalNumber(form.conviction),
     tags: form.tags.split(',').map(tag => tag.trim()).filter(Boolean),
     screenshotUrl: form.screenshotUrl,
     setupNotes: form.setupNotes,
     reviewNotes: form.reviewNotes,
-    openedAt: new Date(form.openedAt).toISOString(),
+    openedAt: form.openedAt ? new Date(form.openedAt).toISOString() : null,
     closedAt: form.closedAt ? new Date(form.closedAt).toISOString() : null,
   })
 }
@@ -123,7 +170,7 @@ function handleSubmit() {
     <div class="form-grid">
       <label class="form-field">
         <span>Asset</span>
-        <input v-model="form.symbol" type="text" placeholder="NQ1!, EURUSD, TSLA" required>
+        <input v-model="form.symbol" type="text" placeholder="NQ1!, EURUSD, TSLA">
       </label>
 
       <label class="form-field">
@@ -170,22 +217,22 @@ function handleSubmit() {
 
       <label class="form-field">
         <span>Quantité</span>
-        <input v-model="form.quantity" type="number" min="0" step="0.01" required>
+        <input v-model="form.quantity" type="number" min="0" step="0.01">
       </label>
 
       <label class="form-field">
         <span>Entrée</span>
-        <input v-model="form.entryPrice" type="number" step="0.01" required>
+        <input v-model="form.entryPrice" type="number" step="0.01">
       </label>
 
       <label class="form-field">
         <span>Stop loss</span>
-        <input v-model="form.stopLoss" type="number" step="0.01" required>
+        <input v-model="form.stopLoss" type="number" step="0.01">
       </label>
 
       <label class="form-field">
         <span>Take profit</span>
-        <input v-model="form.takeProfit" type="number" step="0.01" required>
+        <input v-model="form.takeProfit" type="number" step="0.01">
       </label>
 
       <label class="form-field">
@@ -200,7 +247,7 @@ function handleSubmit() {
 
       <label class="form-field">
         <span>PnL réalisé ($)</span>
-        <input v-model="form.realizedPnl" type="number" step="0.01" required>
+        <input v-model="form.realizedPnl" type="number" step="0.01">
       </label>
 
       <label class="form-field">
@@ -215,7 +262,7 @@ function handleSubmit() {
 
       <label class="form-field">
         <span>Ouverture</span>
-        <input v-model="form.openedAt" type="datetime-local" required>
+        <input v-model="form.openedAt" type="datetime-local">
       </label>
 
       <label class="form-field">
@@ -228,10 +275,22 @@ function handleSubmit() {
         <input v-model="form.tags" type="text" placeholder="breakout, A+, NY open">
       </label>
 
-      <label class="form-field form-field--wide">
-        <span>Capture / URL</span>
-        <input v-model="form.screenshotUrl" type="url" placeholder="https://...">
-      </label>
+      <div class="form-field form-field--wide">
+        <span>Capture du setup</span>
+        <input
+          ref="screenshotInput"
+          type="file"
+          accept="image/*"
+          @change="handleScreenshotChange"
+        >
+        <small v-if="screenshotError" class="field-error">{{ screenshotError }}</small>
+        <div v-if="screenshotPreview" class="screenshot-preview">
+          <img :src="screenshotPreview" alt="Capture du setup">
+          <button class="button button--small button--ghost" type="button" @click="clearScreenshot">
+            Supprimer l'image
+          </button>
+        </div>
+      </div>
 
       <label class="form-field form-field--wide">
         <span>Notes de setup</span>

@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AppShell from '../components/AppShell.vue'
 import pinia from '../stores/index.js'
 import { useAuthStore } from '../stores/auth.js'
+import AnalysisView from '../views/AnalysisView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import LandingView from '../views/LandingView.vue'
 import LoginView from '../views/LoginView.vue'
@@ -98,6 +99,15 @@ const routes = [
         component: ProfileView,
         meta: {
           title: 'Profil',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'analysis',
+        name: 'analysis',
+        component: AnalysisView,
+        meta: {
+          title: 'Analyse',
           requiresAuth: true,
         },
       },

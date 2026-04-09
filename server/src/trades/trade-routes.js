@@ -1,5 +1,5 @@
 import Trade, { allowedSides, allowedStatuses } from './trade-schema.js'
-import { buildTradeOverview, createTrade, serializeTrade, updateTrade } from './trade-service.js'
+import { buildTradeAnalysis, buildTradeOverview, createTrade, serializeTrade, updateTrade } from './trade-service.js'
 
 const sortableFields = new Set(['openedAt', 'createdAt', 'symbol', 'status'])
 const searchableFields = ['symbol', 'strategy', 'session', 'timeframe', 'setupNotes', 'reviewNotes']
@@ -22,26 +22,35 @@ function validateTradePayload(payload) {
     return 'Payload invalide'
   }
 
-  const requiredStrings = ['symbol', 'market', 'side', 'status', 'strategy', 'timeframe', 'session', 'openedAt']
-  const invalidStringField = requiredStrings.find(field => typeof payload[field] !== 'string' || payload[field].trim().length === 0)
+  const optionalStrings = ['symbol', 'market', 'strategy', 'timeframe', 'session', 'openedAt']
+  const invalidStringField = optionalStrings.find(field => payload[field] !== undefined && (typeof payload[field] !== 'string'))
 
   if (invalidStringField) {
-    return `Le champ ${invalidStringField} est requis`
+    return `Le champ ${invalidStringField} doit être un texte`
   }
 
-  if (!allowedSides.includes(payload.side)) {
+  if (payload.side !== undefined && !allowedSides.includes(payload.side)) {
     return 'side invalide'
   }
 
-  if (!allowedStatuses.includes(payload.status)) {
+  if (payload.status !== undefined && !allowedStatuses.includes(payload.status)) {
     return 'status invalide'
   }
 
-  const requiredNumbers = ['entryPrice', 'stopLoss', 'takeProfit', 'quantity']
-  const invalidNumberField = requiredNumbers.find(field => !isFiniteNumber(payload[field]))
+  if (!isOptionalFiniteNumber(payload.entryPrice)) {
+    return 'entryPrice invalide'
+  }
 
-  if (invalidNumberField) {
-    return `Le champ ${invalidNumberField} doit être un nombre valide`
+  if (!isOptionalFiniteNumber(payload.stopLoss)) {
+    return 'stopLoss invalide'
+  }
+
+  if (!isOptionalFiniteNumber(payload.takeProfit)) {
+    return 'takeProfit invalide'
+  }
+
+  if (!isOptionalFiniteNumber(payload.quantity)) {
+    return 'quantity invalide'
   }
 
   if (!isOptionalFiniteNumber(payload.exitPrice)) {
@@ -52,8 +61,8 @@ function validateTradePayload(payload) {
     return 'riskAmount invalide'
   }
 
-  if (!isFiniteNumber(payload.realizedPnl)) {
-    return 'Le champ realizedPnl doit être un nombre valide'
+  if (!isOptionalFiniteNumber(payload.realizedPnl)) {
+    return 'realizedPnl invalide'
   }
 
   if (!isOptionalFiniteNumber(payload.fees)) {
@@ -78,7 +87,7 @@ function validateTradePayload(payload) {
     return 'tags invalide'
   }
 
-  if (Number.isNaN(new Date(payload.openedAt).getTime())) {
+  if (payload.openedAt !== undefined && payload.openedAt !== null && Number.isNaN(new Date(payload.openedAt).getTime())) {
     return 'openedAt invalide'
   }
 
@@ -141,6 +150,20 @@ function tradeRoutes(app) {
     return {
       overview: buildTradeOverview(serializedTrades),
       recentTrades: serializedTrades.slice(0, 5),
+    }
+  })
+
+  app.get('/stats/analysis', {
+    onRequest: [app.authenticate],
+  }, async (request) => {
+    const trades = await Trade.find({ userId: request.currentUser._id })
+      .sort({ openedAt: -1, createdAt: -1 })
+      .lean()
+
+    const serializedTrades = trades.map(serializeTrade)
+
+    return {
+      analysis: buildTradeAnalysis(serializedTrades),
     }
   })
 

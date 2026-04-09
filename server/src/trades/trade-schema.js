@@ -13,52 +13,51 @@ const tradeSchema = new Schema({
   },
   symbol: {
     type: String,
-    required: true,
     trim: true,
     uppercase: true,
+    default: '',
   },
   market: {
     type: String,
-    required: true,
     trim: true,
+    default: '',
   },
   side: {
     type: String,
-    required: true,
     enum: allowedSides,
+    default: 'long',
   },
   status: {
     type: String,
-    required: true,
     enum: allowedStatuses,
     default: 'planned',
   },
   strategy: {
     type: String,
-    required: true,
     trim: true,
+    default: '',
   },
   timeframe: {
     type: String,
-    required: true,
     trim: true,
+    default: '',
   },
   session: {
     type: String,
-    required: true,
     trim: true,
+    default: '',
   },
   entryPrice: {
     type: Number,
-    required: true,
+    default: null,
   },
   stopLoss: {
     type: Number,
-    required: true,
+    default: null,
   },
   takeProfit: {
     type: Number,
-    required: true,
+    default: null,
   },
   exitPrice: {
     type: Number,
@@ -66,7 +65,7 @@ const tradeSchema = new Schema({
   },
   quantity: {
     type: Number,
-    required: true,
+    default: null,
     min: 0,
   },
   riskAmount: {
@@ -110,7 +109,7 @@ const tradeSchema = new Schema({
   },
   openedAt: {
     type: Date,
-    required: true,
+    default: Date.now,
   },
   closedAt: {
     type: Date,

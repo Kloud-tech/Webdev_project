@@ -11,6 +11,21 @@ const loading = ref(true)
 const errorMessage = ref('')
 const overview = ref(null)
 const recentTrades = ref([])
+const selectedCurrency = ref('USD')
+
+const exchangeRate = 1.17
+
+function convertAmount(value) {
+  if (selectedCurrency.value === 'EUR') {
+    return (value ?? 0) / exchangeRate
+  }
+
+  return value ?? 0
+}
+
+function formatDashboardCurrency(value) {
+  return formatCurrency(convertAmount(value), selectedCurrency.value)
+}
 
 const metrics = computed(() => {
   if (!overview.value) {
@@ -30,8 +45,8 @@ const metrics = computed(() => {
     },
     {
       label: 'PnL net',
-      value: formatCurrency(overview.value.netPnl),
-      hint: `R moyen ${formatNumber(overview.value.averageR)}R`,
+      value: formatDashboardCurrency(overview.value.netPnl),
+      hint: `R moyen ${formatNumber(overview.value.averageR)}R · Taux fixe 1 € = ${exchangeRate} $`,
     },
   ]
 })
@@ -73,6 +88,14 @@ onMounted(loadOverview)
         <h2>Tableau de bord</h2>
         <p>Vue rapide sur les trades enregistrés et les résultats.</p>
       </div>
+
+      <label class="currency-switcher">
+        <span>Devise</span>
+        <select v-model="selectedCurrency">
+          <option value="USD">Dollar ($)</option>
+          <option value="EUR">Euro (€)</option>
+        </select>
+      </label>
     </div>
 
     <p v-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
@@ -102,11 +125,11 @@ onMounted(loadOverview)
           <div class="stack-md">
             <div class="trade-highlight">
               <span>Meilleur trade</span>
-              <strong>{{ overview?.bestTrade ? `${overview.bestTrade.symbol} · ${formatCurrency(overview.bestTrade.analytics.pnlAmount)}` : 'Aucun trade gagnant' }}</strong>
+              <strong>{{ overview?.bestTrade ? `${overview.bestTrade.symbol} · ${formatDashboardCurrency(overview.bestTrade.analytics.pnlAmount)}` : 'Aucun trade gagnant' }}</strong>
             </div>
             <div class="trade-highlight">
               <span>Pire trade</span>
-              <strong>{{ overview?.worstTrade ? `${overview.worstTrade.symbol} · ${formatCurrency(overview.worstTrade.analytics.pnlAmount)}` : 'Aucun trade perdant' }}</strong>
+              <strong>{{ overview?.worstTrade ? `${overview.worstTrade.symbol} · ${formatDashboardCurrency(overview.worstTrade.analytics.pnlAmount)}` : 'Aucun trade perdant' }}</strong>
             </div>
           </div>
         </article>

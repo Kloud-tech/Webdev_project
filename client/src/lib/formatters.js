@@ -1,7 +1,7 @@
-function formatCurrency(value) {
+function formatCurrency(value, currency = 'USD') {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: 'USD',
+    currency,
     maximumFractionDigits: 2,
   }).format(value ?? 0)
 }
