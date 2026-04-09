@@ -26,6 +26,7 @@ PORT=3000
 NODE_ENV=development
 MONGODB_URI=mongodb://stan:stan@localhost:35115/myapp?authSource=myapp
 APP_BASE_URL="http://localhost:5173"
+ALLOWED_ORIGINS="http://localhost:5173"
 JWT_SECRET="change-me-in-development"
 JWT_COOKIE_NAME="token"
 SMTP_HOST=""
@@ -124,6 +125,20 @@ npm run lint --workspace=server
 
 L’API contient les routes d’authentification `POST /auth/register`, `POST /auth/login`, `POST /auth/logout` et `POST /auth/resend-verification-email`. La partie utilisateur contient notamment `GET /users/verify-email`, `GET /users/me`, `GET /users`, `GET /users/:id` et `DELETE /users/:id`. La partie métier des trades contient `GET /trades/stats/overview`, `GET /trades`, `GET /trades/:id`, `POST /trades`, `PATCH /trades/:id` et `DELETE /trades/:id`.
 
+## Déploiement
+
+Le frontend est prévu pour être déployé sur Netlify et le backend sur Render, conformément à la consigne. La base de données doit être déplacée sur MongoDB Atlas pour la version en ligne.
+
+Pour le backend, le plus simple est de créer un Web Service Render en prenant le dossier `server` comme racine. Le build command est `npm install` et le start command est `npm start`. Le fichier `render.yaml` présent à la racine peut servir de base si vous voulez garder une configuration versionnée.
+
+Sur Render, il faut définir au minimum les variables `HOST=0.0.0.0`, `NODE_ENV=production`, `MONGODB_URI`, `APP_BASE_URL`, `ALLOWED_ORIGINS`, `JWT_SECRET` et `JWT_COOKIE_NAME`. Si vous voulez envoyer de vrais mails de validation, il faut aussi renseigner `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS` et `MAIL_FROM`. En production, `APP_BASE_URL` et `ALLOWED_ORIGINS` doivent contenir l’URL Netlify du frontend.
+
+Pour le frontend, le plus simple est de créer un site Netlify en prenant `client` comme base directory. La commande de build est `npm run build` et le dossier publié est `dist`. Le fichier `netlify.toml` présent à la racine donne déjà cette configuration.
+
+Sur Netlify, il faut ajouter la variable `VITE_API_BASE_URL` avec l’URL publique du backend Render. Le frontend utilise cette variable pour appeler l’API distante tout en gardant les cookies de session.
+
+MongoDB Atlas est utilisé pour la version déployée. Il faut créer un cluster, créer un utilisateur avec mot de passe, autoriser l’accès réseau puis récupérer la chaîne de connexion pour la mettre dans `MONGODB_URI` sur Render.
+
 ## Vérifications réalisées
 
 Les vérifications suivantes passent sur l’état actuel du projet :
@@ -144,3 +159,5 @@ npx playwright install
 ## Remarques
 
 En développement local, si le SMTP n’est pas configuré, le lien de validation d’email est renvoyé dans la réponse d’inscription. MongoDB local est attendu dans Docker, conformément au starter fourni.
+
+Le projet peut aussi fonctionner sans SMTP en ligne pour une démo. Dans ce cas, le backend ne tente pas d’envoyer un vrai mail et renvoie directement le lien de validation dans la réponse de l’API.

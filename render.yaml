@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: webdev-trading-journal-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: NODE_ENV
+        value: production
+      - key: JWT_COOKIE_NAME
+        value: token

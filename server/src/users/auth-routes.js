@@ -10,12 +10,7 @@ const usernameRegex = /^[\w-]{3,30}$/
 const minimumPasswordLength = 8
 
 function buildAuthCookieOptions() {
-  return {
-    path: '/',
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: config.env === 'production',
-  }
+  return config.jwt.cookie
 }
 
 function buildVerificationUrl(validationToken) {
@@ -23,7 +18,7 @@ function buildVerificationUrl(validationToken) {
 }
 
 function withVerificationDebugData(payload, validationToken) {
-  if (config.env === 'production') {
+  if (config.env === 'production' && config.mail.enabled) {
     return payload
   }
 
@@ -123,7 +118,9 @@ function authRoutes(app) {
     }
 
     try {
-      await sendVerificationEmail(app, normalizedEmail, validationToken)
+      if (config.mail.enabled) {
+        await sendVerificationEmail(app, normalizedEmail, validationToken)
+      }
     } catch (error) {
       app.log.error({
         err: error,
@@ -137,7 +134,9 @@ function authRoutes(app) {
     }
 
     return reply.status(201).send(withVerificationDebugData({
-      message: 'Utilisateur créé avec succès. Veuillez vérifier votre email pour confirmer votre compte.',
+      message: config.mail.enabled
+        ? 'Utilisateur créé avec succès. Veuillez vérifier votre email pour confirmer votre compte.'
+        : 'Utilisateur créé avec succès. Utilisez le lien de validation renvoyé par l’API.',
       email: user.email,
     }, validationToken))
   })
@@ -171,7 +170,9 @@ function authRoutes(app) {
     }
 
     try {
-      await sendVerificationEmail(app, user.email, user.validationToken)
+      if (config.mail.enabled) {
+        await sendVerificationEmail(app, user.email, user.validationToken)
+      }
     } catch (error) {
       app.log.error({
         err: error,
@@ -184,7 +185,9 @@ function authRoutes(app) {
     }
 
     return reply.send(withVerificationDebugData({
-      message: 'Email de validation renvoyé avec succès.',
+      message: config.mail.enabled
+        ? 'Email de validation renvoyé avec succès.'
+        : 'Lien de validation renvoyé par l’API.',
       email: user.email,
     }, user.validationToken))
   })

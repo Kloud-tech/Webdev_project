@@ -17,12 +17,7 @@ function buildPublicUser(user) {
 }
 
 function buildAuthCookieOptions() {
-  return {
-    path: '/',
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: config.env === 'production',
-  }
+  return config.jwt.cookie
 }
 
 function usersRoutes(app) {
